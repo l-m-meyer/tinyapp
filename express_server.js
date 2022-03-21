@@ -2,6 +2,10 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 
+// converts the request body from a Buffer into a readable string
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: true}));
+
 app.set('view engine', 'ejs');
 
 const urlDatabase = {
