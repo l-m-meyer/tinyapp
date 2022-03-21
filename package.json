@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/l-m-meyer/tinyapp/issues"
   },
-  "homepage": "https://github.com/l-m-meyer/tinyapp#readme"
+  "homepage": "https://github.com/l-m-meyer/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
 }
