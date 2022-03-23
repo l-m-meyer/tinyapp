@@ -34,19 +34,28 @@ app.get('/', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const userID = req.cookies.user_id;
-  const templateVars = { urls: urlDatabase, user_id: userID };
+  const templateVars = { 
+    urls: urlDatabase, 
+    user: users[userID] 
+  };
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
   const userID = req.cookies.id;
-  const templateVars = { user_id: userID };
+  const templateVars = { 
+    user: users[userID] 
+  };
   res.render('urls_new', templateVars);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
   const userID = req.cookies.id;
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_id: userID };
+  const templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL], 
+    user: users[userID] 
+  };
   res.render('urls_show', templateVars);
 });
 
@@ -84,9 +93,8 @@ app.post('/urls/:shortURL', (req, res) => {
 
 // creates a cookie to keep user logged in
 app.post('/login', (req, res) => {
-  const user_id = req.body['user_id'];
-  console.log('user_id:', user_id);
-  res.cookie('user_id', user_id);
+  const userID = req.body.user_id;
+  res.cookie('user_id', userID);
   res.redirect('/urls');
 });
 
@@ -103,11 +111,21 @@ app.get('/register', (req, res) => {
 
 // adds a new user to users object
 app.post('/register', (req, res) => {
-  const id = generateRandomID();
+  // validate email and password have been passed
   const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).send('Email and password required.');
+  }
+  // check if email exists
+  for (let user in users) {
+    if (users[user].email === (email)) {
+      return res.status(400).send('Email already exists.');
+    }
+  }
+  const id = generateRandomID();
+
   users[id] = { id, email, password };
-  res.cookie('id', users[id]);
-  console.log('Cookie Output:', users[id]);
+  res.cookie('user_id', id);
   console.log(users);
   res.redirect('/urls');
 });
