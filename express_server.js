@@ -41,7 +41,7 @@ app.get('/urls/:shortURL', (req, res) => {
 });
 
 app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <b>World</b></body></html>\n')
+  res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
 
 
@@ -85,7 +85,6 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  const username = req.body.username;
   res.clearCookie('username');
   res.redirect('/urls');
 });
