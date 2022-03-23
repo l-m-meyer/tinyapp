@@ -91,6 +91,10 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect('/urls');
 });
 
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
 // creates a cookie to keep user logged in
 app.post('/login', (req, res) => {
   const userID = req.body.user_id;
