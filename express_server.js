@@ -40,6 +40,7 @@ app.get('/hello', (req, res) => {
   res.send('<html><body>Hello <b>World</b></body></html>\n')
 });
 
+
 app.post('/urls', (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
@@ -47,12 +48,14 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+// uses the shortURL to redirect to the longURL
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
   res.redirect(`http://${longURL}`);
 });
 
+// deletes a url
 app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
   for (let url in urlDatabase) {
@@ -68,7 +71,13 @@ app.post('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect('/urls');
-})
+});
+
+app.post('/login', (req, res) => {
+  const username = req.body.username;
+  res.cookie('name', username);
+  res.redirect('/urls');
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
