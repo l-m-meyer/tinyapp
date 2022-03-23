@@ -1,11 +1,8 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
-
-// returns a string of 6 random alphanumeric characters
-const generateRandomString = () => {
-  return Math.random().toString(36).substr(2, 6);
-};
+const { urlDatabase } = require('./data/urlInfo');
+const { generateRandomID } = require('./helpers/urlHelpers');
 
 // converts the request body from a Buffer into a readable string
 const bodyParser = require('body-parser');
@@ -15,11 +12,6 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 app.set('view engine', 'ejs');
-
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
 
 app.get('/', (req, res) => {
   res.send('Hello!');
@@ -47,7 +39,7 @@ app.get('/hello', (req, res) => {
 
 app.post('/urls', (req, res) => {
   const longURL = req.body.longURL;
-  const shortURL = generateRandomString();
+  const shortURL = generateRandomID();
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
