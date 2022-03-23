@@ -13,29 +13,42 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
+const users = {
+  ranUserID: {
+    id: 'ranUserID',
+    email: 'user@example.com', 
+    password: 'purple-monkey-dinsosaur'
+  }
+};
+
+const addUsers = () => {};
+
+const findUsers = () => {
+  
+};
+
+
 app.get('/', (req, res) => {
-  res.send('Hello!');
+  res.redirect('/urls');
 });
 
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
+  const userID = req.cookies.user_id;
+  const templateVars = { urls: urlDatabase, user_id: userID };
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
-  const templateVars = { username: req.cookies['username'] };
+  const userID = req.cookies.id;
+  const templateVars = { user_id: userID };
   res.render('urls_new', templateVars);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies['username'] };
+  const userID = req.cookies.id;
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user_id: userID };
   res.render('urls_show', templateVars);
 });
-
-app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <b>World</b></body></html>\n');
-});
-
 
 app.post('/urls', (req, res) => {
   const longURL = req.body.longURL;
@@ -71,13 +84,31 @@ app.post('/urls/:shortURL', (req, res) => {
 
 // creates a cookie to keep user logged in
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
+  const user_id = req.body['user_id'];
+  console.log('user_id:', user_id);
+  res.cookie('user_id', user_id);
   res.redirect('/urls');
 });
 
+// clears the cookies to logout user
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
+  res.redirect('/urls');
+});
+
+// renders registration page
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
+// adds a new user to users object
+app.post('/register', (req, res) => {
+  const id = generateRandomID();
+  const { email, password } = req.body;
+  users[id] = { id, email, password };
+  res.cookie('id', users[id]);
+  console.log('Cookie Output:', users[id]);
+  console.log(users);
   res.redirect('/urls');
 });
 
