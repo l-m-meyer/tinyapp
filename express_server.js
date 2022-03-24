@@ -33,7 +33,10 @@ app.get('/', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const userID = req.cookies.user_id;
-
+  
+  if (!userID){
+    res.redirect('/login');
+  }
   const templateVars = { 
     urls: urlDatabase, 
     user: users[userID] 
