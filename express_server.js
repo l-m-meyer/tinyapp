@@ -37,10 +37,12 @@ app.get('/', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const userID = req.cookies.user_id;
+  console.log('userID:', userID);
   const templateVars = { 
     urls: urlDatabase, 
     user: users[userID] 
   };
+  console.log('user:', templateVars.user);
   res.render('urls_index', templateVars);
 });
 
@@ -101,8 +103,7 @@ app.get('/login', (req, res) => {
 
 // creates a cookie to keep user logged in
 app.post('/login', (req, res) => {
-  const userID = req.body.user_id;
-
+ 
   // validate email and password have been passed
   const { email, password } = req.body;
   if (!email || !password) {
@@ -113,14 +114,26 @@ app.post('/login', (req, res) => {
 
   const passwordMatches = Object.keys(users).find(userID => users[userID].password === password);
 
+  const fetchID = (email) => {
+    // Object.keys(users)
+    for (let key in users) {
+      if (users[key].email === email) {
+        console.log('key:', key);
+        return key;
+      }
+    }
+  };
+
   if (!emailExists) {
-    res.status(403).send('Unregistered email.');
+    return res.status(403).send('Unregistered email.');
   }
 
   if (emailExists && !passwordMatches) {
     return res.status(403).send('Incorrect password.');
   }
-  res.cookie('user_id', userID);
+  console.log('fetchID()', fetchID(email));
+  // console.log('fetchID():', email);
+  res.cookie('user_id', fetchID(email));
   res.redirect('/urls');
 });
 
