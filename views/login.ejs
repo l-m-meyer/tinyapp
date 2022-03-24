@@ -11,18 +11,16 @@
   </head>
 
   <body>
-
-    
-    
+    <%- include('partials/_header') %>
     <main style="margin: 1em;">
       <h3>Login</h3>
       <form class="form-inline" action="/login" method="POST">
         <div class="form-group mb-2">
-          
-          <input type="email" name="email" placeholder="Enter email">
-          <input type="password" name="password" placeholder="Enter password">
+          <label name="email">Enter email</label>
+          <input class="form-control" type="email" name="email" placeholder="Enter email">
+          <label name="password">Enter password</label>
+          <input class="form-control" type="password" name="password" placeholder="Enter password">
           <button type="submit" class="btn btn-primary">Login</button>
-          
         </div>
       </form>
     </main>

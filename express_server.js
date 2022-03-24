@@ -2,7 +2,13 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const { urlDatabase } = require('./data/urlInfo');
-const { generateRandomID } = require('./helpers/urlHelpers');
+const { 
+  generateRandomID,
+  findEmail,
+  findPassword,
+  fetchID 
+} = require('./helpers/helperFuncs');
+const { users } = require('./data/userInfo');
 
 // converts the request body from a Buffer into a readable string
 const bodyParser = require('body-parser');
@@ -14,35 +20,18 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
-const users = {
-  ranUserID: {
-    id: 'ranUserID',
-    email: 'user@example.com', 
-    password: 'purple'
-  }
-};
-
-const addUsers = () => {};
-
-const validateEmail = (email, userDB) => {
-  const emailExists = Object.keys(users).find(userID => users[userID].email === email);
-
-  return emailExists;
-};
-
-
 app.get('/', (req, res) => {
   res.redirect('/urls');
 });
 
 app.get('/urls', (req, res) => {
   const userID = req.cookies.user_id;
-  console.log('userID:', userID);
+
   const templateVars = { 
     urls: urlDatabase, 
     user: users[userID] 
   };
-  console.log('user:', templateVars.user);
+  
   res.render('urls_index', templateVars);
 });
 
@@ -98,7 +87,12 @@ app.post('/urls/:shortURL', (req, res) => {
 
 // renders login page
 app.get('/login', (req, res) => {
-  res.render('login');
+  const userID = req.cookies.user_id;
+  const templateVars = { 
+    urls: urlDatabase, 
+    user: users[userID] 
+  };
+  res.render('login', templateVars);
 });
 
 // creates a cookie to keep user logged in
@@ -110,19 +104,9 @@ app.post('/login', (req, res) => {
     return res.status(400).send('Email and password required.');
   }
 
-  const emailExists = Object.keys(users).find(userID => users[userID].email === email);
-
-  const passwordMatches = Object.keys(users).find(userID => users[userID].password === password);
-
-  const fetchID = (email) => {
-    // Object.keys(users)
-    for (let key in users) {
-      if (users[key].email === email) {
-        console.log('key:', key);
-        return key;
-      }
-    }
-  };
+  const emailExists = findEmail(email, users);
+  
+  const passwordMatches = findPassword(password, users);
 
   if (!emailExists) {
     return res.status(403).send('Unregistered email.');
@@ -131,8 +115,7 @@ app.post('/login', (req, res) => {
   if (emailExists && !passwordMatches) {
     return res.status(403).send('Incorrect password.');
   }
-  console.log('fetchID()', fetchID(email));
-  // console.log('fetchID():', email);
+  
   res.cookie('user_id', fetchID(email));
   res.redirect('/urls');
 });
@@ -145,7 +128,12 @@ app.post('/logout', (req, res) => {
 
 // renders registration page
 app.get('/register', (req, res) => {
-  res.render('register');
+  const userID = req.cookies.user_id;
+  const templateVars = { 
+    urls: urlDatabase, 
+    user: users[userID] 
+  };
+  res.render('register', templateVars);
 });
 
 // adds a new user to users object
@@ -156,16 +144,14 @@ app.post('/register', (req, res) => {
     return res.status(400).send('Email and password required.');
   }
   // check if email exists
-  for (let user in users) {
-    if (users[user].email === (email)) {
-      return res.status(400).send('Email already exists.');
-    }
+  if (findEmail(email, users)) {
+    return res.status(400).send('Email already exists.');
   }
+  
   const id = generateRandomID();
 
   users[id] = { id, email, password };
   res.cookie('user_id', id);
-  console.log(users);
   res.redirect('/urls');
 });
 
