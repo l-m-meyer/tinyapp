@@ -7,7 +7,8 @@ const {
   getCurrentUser,
   findEmail,
   findPassword,
-  fetchID 
+  fetchID,
+  urlsForUser 
 } = require('./helpers/helperFuncs');
 const { users } = require('./data/userInfo');
 
@@ -33,12 +34,14 @@ app.get('/', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const userID = req.cookies.user_id;
-
   if (!userID){
-    return res.redirect('/login');
+    return res.status(403).send('<p>Please <a href="/login">login</a> first.</p>');
   }
+
+  const userUrls = urlsForUser(userID, urlDatabase);
+
   const templateVars = { 
-    urls: urlDatabase, 
+    urls: userUrls, 
     user: users[userID] 
   };
   
@@ -58,31 +61,49 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
-  const userID = req.cookies.id;
+  const userID = req.cookies.user_id;
+  const urlToEdit = urlDatabase[req.params.shortURL];
+
+  if (urlToEdit.userID !== userID) {
+    return res.status(403).send('You do not have permission.');
+  }
+
   const templateVars = { 
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL], 
+    longURL: urlDatabase[req.params.shortURL].longURL, 
     user: users[userID] 
   };
   res.render('urls_show', templateVars);
 });
 
 app.post('/urls', (req, res) => {
+  const userID = req.cookies.user_id;
+  
   const longURL = req.body.longURL;
   const shortURL = generateRandomID();
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = {
+    longURL,
+    userID
+  };
   res.redirect(`/urls/${shortURL}`);
 });
 
 // uses the shortURL to redirect to the longURL
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
-  res.redirect(`http://${longURL}`);
+  const longURL = urlDatabase[shortURL].longURL;
+  res.redirect(longURL);
 });
 
 // deletes a url
 app.post('/urls/:shortURL/delete', (req, res) => {
+  const userID = req.cookies.user_id;
+  const urlToDelete = urlDatabase[req.params.shortURL];
+
+  if (urlToDelete.userID !== userID) {
+    return res.status(403).send('You do not have permission.');
+  }
+  
   const shortURL = req.params.shortURL;
   for (let url in urlDatabase) {
     if (url === shortURL) {
@@ -94,8 +115,14 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 // edits the longURL
 app.post('/urls/:shortURL', (req, res) => {
+  const userID = req.cookies.user_id;
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.longURL;
+  const longURL = req.body.longURL;
+
+  if (!users[userID]) {
+    return res.redirect('/login');
+  }
+  urlDatabase[shortURL] = {longURL, userID}
   res.redirect('/urls');
 });
 
@@ -130,7 +157,7 @@ app.post('/login', (req, res) => {
     return res.status(403).send('Incorrect password.');
   }
   
-  res.cookie('user_id', fetchID(email));
+  res.cookie('user_id', fetchID(email, users));
   res.redirect('/urls');
 });
 

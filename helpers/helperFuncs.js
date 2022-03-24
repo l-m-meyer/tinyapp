@@ -9,6 +9,17 @@ const getCurrentUser = (userDB, req) => {
   
 };
 
+
+const urlsForUser = (id, urlDB) => {
+  const userUrls = {};
+  for (let key in urlDB) {
+    if (urlDB[key].userID === id) {
+      userUrls[key] = urlDB[key];
+    }
+  } return userUrls;
+}
+
+
 const addUsers = () => {};
 
 const findEmail = (email, userDB) => {
@@ -23,9 +34,9 @@ const findPassword = (password, userDB) => {
   return passwordMatches;
 }
 
-const fetchID = (email) => {
-  for (let key in users) {
-    if (users[key].email === email) {
+const fetchID = (email, userDB) => {
+  for (let key in userDB) {
+    if (userDB[key].email === email) {
       return key;
     }
   }
@@ -36,5 +47,6 @@ module.exports = {
   getCurrentUser,
   findEmail,
   findPassword,
-  fetchID 
+  fetchID,
+  urlsForUser 
 };
