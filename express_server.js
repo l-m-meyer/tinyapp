@@ -26,16 +26,16 @@ app.get('/', (req, res) => {
   const userID = req.cookies.user_id;
   
   if (!userID){
-    res.redirect('/login');
+    return res.redirect('/login');
   }
   res.redirect('/urls');
 });
 
 app.get('/urls', (req, res) => {
   const userID = req.cookies.user_id;
-  
+
   if (!userID){
-    res.redirect('/login');
+    return res.redirect('/login');
   }
   const templateVars = { 
     urls: urlDatabase, 
@@ -52,7 +52,7 @@ app.get('/urls/new', (req, res) => {
   };
 
   if (!userID){ 
-    res.redirect('/login');
+    return res.redirect('/login');
   }
   res.render('urls_new', templateVars);
 });
