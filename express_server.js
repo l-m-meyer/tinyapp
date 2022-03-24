@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
+const bcrypt = require('bcryptjs');
+
 const { urlDatabase } = require('./data/urlInfo');
 const { 
   generateRandomID,
@@ -11,6 +13,7 @@ const {
   urlsForUser 
 } = require('./helpers/helperFuncs');
 const { users } = require('./data/userInfo');
+
 
 // converts the request body from a Buffer into a readable string
 const bodyParser = require('body-parser');
@@ -92,6 +95,7 @@ app.post('/urls', (req, res) => {
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
+  console.log(longURL);
   res.redirect(longURL);
 });
 
@@ -146,8 +150,9 @@ app.post('/login', (req, res) => {
   }
 
   const emailExists = findEmail(email, users);
+  const userID = fetchID(email, users);
   
-  const passwordMatches = findPassword(password, users);
+  const passwordMatches = bcrypt.compareSync(password, users[userID].password);
 
   if (!emailExists) {
     return res.status(403).send('Unregistered email.');
@@ -190,8 +195,15 @@ app.post('/register', (req, res) => {
   }
   
   const id = generateRandomID();
-
-  users[id] = { id, email, password };
+  
+  const hash = bcrypt.hashSync(password, 10);
+  
+  users[id] = { 
+    id, 
+    email, 
+    password: hash 
+  };
+  
   res.cookie('user_id', id);
   res.redirect('/urls');
 });

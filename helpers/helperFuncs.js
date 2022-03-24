@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs/dist/bcrypt');
 const { users } = require('../data/userInfo');
 
 // returns a string of 6 random alphanumeric characters
@@ -28,11 +29,13 @@ const findEmail = (email, userDB) => {
   return emailExists;
 };
 
-const findPassword = (password, userDB) => {
-  const passwordMatches = Object.keys(userDB).find(userID => userDB[userID].password === password);
+// const findPassword = (password, userDB) => {
+//   const passwordMatches = bcrypt.compareSync(password, hash);
+  
+//   const passwordMatches = Object.keys(userDB).find(userID => userDB[userID].password === password);
 
-  return passwordMatches;
-}
+//   return passwordMatches;
+// }
 
 const fetchID = (email, userDB) => {
   for (let key in userDB) {
@@ -46,7 +49,7 @@ module.exports = {
   generateRandomID,
   getCurrentUser,
   findEmail,
-  findPassword,
+  // findPassword,
   fetchID,
   urlsForUser 
 };
