@@ -5,6 +5,10 @@ const generateRandomID = () => {
   return Math.random().toString(36).substr(2, 6);
 };
 
+const getCurrentUser = (userDB, req) => {
+  
+};
+
 const addUsers = () => {};
 
 const findEmail = (email, userDB) => {
@@ -29,6 +33,7 @@ const fetchID = (email) => {
 
 module.exports = { 
   generateRandomID,
+  getCurrentUser,
   findEmail,
   findPassword,
   fetchID 

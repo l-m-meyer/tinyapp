@@ -4,6 +4,7 @@ const PORT = 8080;
 const { urlDatabase } = require('./data/urlInfo');
 const { 
   generateRandomID,
+  getCurrentUser,
   findEmail,
   findPassword,
   fetchID 
@@ -20,7 +21,13 @@ app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
+// redirects to urls_index for current logged in user or login page if not logged in
 app.get('/', (req, res) => {
+  const userID = req.cookies.user_id;
+  
+  if (!userID){
+    res.redirect('/login');
+  }
   res.redirect('/urls');
 });
 
