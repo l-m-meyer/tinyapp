@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 
 const cookieParser = require('cookie-parser');
+const res = require('express/lib/response');
 app.use(cookieParser());
 
 app.set('view engine', 'ejs');
@@ -17,14 +18,16 @@ const users = {
   ranUserID: {
     id: 'ranUserID',
     email: 'user@example.com', 
-    password: 'purple-monkey-dinsosaur'
+    password: 'purple'
   }
 };
 
 const addUsers = () => {};
 
-const findUsers = () => {
-  
+const validateEmail = (email, userDB) => {
+  const emailExists = Object.keys(users).find(userID => users[userID].email === email);
+
+  return emailExists;
 };
 
 
@@ -91,6 +94,7 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect('/urls');
 });
 
+// renders login page
 app.get('/login', (req, res) => {
   res.render('login');
 });
@@ -98,6 +102,24 @@ app.get('/login', (req, res) => {
 // creates a cookie to keep user logged in
 app.post('/login', (req, res) => {
   const userID = req.body.user_id;
+
+  // validate email and password have been passed
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).send('Email and password required.');
+  }
+
+  const emailExists = Object.keys(users).find(userID => users[userID].email === email);
+
+  const passwordMatches = Object.keys(users).find(userID => users[userID].password === password);
+
+  if (!emailExists) {
+    res.status(403).send('Unregistered email.');
+  }
+
+  if (emailExists && !passwordMatches) {
+    return res.status(403).send('Incorrect password.');
+  }
   res.cookie('user_id', userID);
   res.redirect('/urls');
 });
