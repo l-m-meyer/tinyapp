@@ -49,7 +49,6 @@ module.exports = {
   generateRandomID,
   getCurrentUser,
   findEmail,
-  // findPassword,
   fetchID,
   urlsForUser 
 };
