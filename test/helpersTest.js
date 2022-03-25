@@ -22,4 +22,11 @@ describe('getUserByEmail', function() {
     
     assert.deepEqual(user, expectedUserID);
   });
+
+  it('should return undefined if an email is non-existent', function() {
+    const user = getUserByEmail("does@notexist.com", testUsers);
+    const expectedUserID = undefined;
+
+    assert.deepEqual(user, expectedUserID);
+  });
 });
