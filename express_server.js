@@ -9,7 +9,7 @@ const {
   getCurrentUser,
   findEmail,
   findPassword,
-  fetchID,
+  getUserByEmail,
   urlsForUser 
 } = require('./helpers/helperFuncs');
 const { users } = require('./data/userInfo');
@@ -164,7 +164,7 @@ app.post('/login', (req, res) => {
   }
   
   const emailExists = findEmail(email, users);
-  const userID = fetchID(email, users);
+  const userID = getUserByEmail(email, users);
   console.log('userID: ', userID);
   console.log('user obj: ', users);
   

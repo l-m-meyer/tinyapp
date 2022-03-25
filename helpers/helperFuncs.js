@@ -37,10 +37,10 @@ const findEmail = (email, userDB) => {
 //   return passwordMatches;
 // }
 
-const fetchID = (email, userDB) => {
-  for (let key in userDB) {
-    if (userDB[key].email === email) {
-      return key;
+const getUserByEmail = (email, userDB) => {
+  for (let user in userDB) {
+    if (userDB[user].email === email) {
+      return user;
     }
   }
 };
@@ -49,6 +49,6 @@ module.exports = {
   generateRandomID,
   getCurrentUser,
   findEmail,
-  fetchID,
+  getUserByEmail,
   urlsForUser 
 };
