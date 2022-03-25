@@ -6,12 +6,10 @@ const bcrypt = require('bcryptjs');
 const { urlDatabase } = require('./data/urlInfo');
 const { 
   generateRandomID,
-  getCurrentUser,
   findEmail,
-  findPassword,
   getUserByEmail,
   urlsForUser 
-} = require('./helpers/helperFuncs');
+} = require('./helpers/helpers');
 const { users } = require('./data/userInfo');
 
 
