@@ -30,6 +30,7 @@ const {
   urlsForUser 
 } = require('./helpers/helpers');
 
+
 /**************************
  *  INITIALIZE DATABASES  *
  *************************/
@@ -37,12 +38,14 @@ const {
 const { urlDatabase } = require('./data/urlInfo');
 const users = {};
 
+
 /************
  *  ROUTES  *
  ***********/
 
 // GET /
-// redirects to urls_index for current logged in user or login page if not logged in
+// redirects to urls index for current logged in user,
+// or login page if not logged in
 app.get('/', (req, res) => {
   const userID = req.session.user_id;
   
@@ -52,8 +55,37 @@ app.get('/', (req, res) => {
   res.redirect('/urls');
 });
 
+// GET /register
+// renders registration page
+app.get('/register', (req, res) => {
+  const userID = req.session.user_id;
+  if (userID && users[userID]){
+    return res.redirect('/urls');
+  }
+  const templateVars = { 
+    urls: urlDatabase, 
+    user: users[userID] 
+  };
+  res.render('register', templateVars);
+});
+
+// GET /login
+// renders login page
+app.get('/login', (req, res) => {
+  const userID = req.session.user_id;
+  if (users[userID]){
+    return res.redirect('/urls');
+  }
+  const templateVars = { 
+    urls: urlDatabase, 
+    user: users[userID] 
+  };
+  res.render('login', templateVars);
+});
+
 // GET /urls
-// renders urls_index page for current logged in user or status message if not logged in
+// renders urls index for current logged in user, 
+// or status message 403 if not logged in
 app.get('/urls', (req, res) => {
   const userID = req.session.user_id;
 
@@ -71,8 +103,9 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
-
 // GET /urls/new
+// renders the new URL creation page, 
+// or redirects to login page if user is not logged in
 app.get('/urls/new', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { 
@@ -85,8 +118,9 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new', templateVars);
 });
 
-
 // GET /urls/:shortURL
+// renders the information page for a given short URL, 
+// or sends a 403 status message
 app.get('/urls/:shortURL', (req, res) => {
   const userID = req.session.user_id;
   const urlToEdit = urlDatabase[req.params.shortURL];
@@ -104,7 +138,7 @@ app.get('/urls/:shortURL', (req, res) => {
 });
 
 // GET /u/:shortURL
-// uses the shortURL to redirect to the longURL
+// redirects to the long URL
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
@@ -113,6 +147,7 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 // POST /urls
+// creates a new shortened URL
 app.post('/urls', (req, res) => {
   const userID = req.session.user_id;
   
@@ -130,7 +165,7 @@ app.post('/urls', (req, res) => {
 });
 
 // POST /urls/:shortURL/delete
-// deletes a url
+// deletes a URL
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userID = req.session.user_id;
   const urlToDelete = urlDatabase[req.params.shortURL];
@@ -149,7 +184,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 });
 
 // POST /urls/:shortURL
-// edits the longURL
+// edits the long URL
 app.post('/urls/:shortURL', (req, res) => {
   const userID = req.session.user_id;
   const shortURL = req.params.shortURL;
@@ -165,64 +200,8 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect('/urls');
 });
 
-// renders login page
-app.get('/login', (req, res) => {
-  const userID = req.session.user_id;
-  if (users[userID]){
-    return res.redirect('/urls');
-  }
-  const templateVars = { 
-    urls: urlDatabase, 
-    user: users[userID] 
-  };
-  res.render('login', templateVars);
-});
-
-// creates a cookie to keep user logged in
-app.post('/login', (req, res) => {
- 
-  // validate email and password have been passed
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).send('Email and password required.');
-  }
-  
-  const emailExists = findEmail(email, users);
-  const userID = getUserByEmail(email, users);
-  
-  if (!emailExists) {
-    return res.status(403).send('Unregistered email.');
-  }
-  const passwordMatches = bcrypt.compareSync(password, users[userID].password);
-
-  if (emailExists && !passwordMatches) {
-    return res.status(403).send('Incorrect password.');
-  }
-  
-  req.session.user_id = users[userID].id;
-  res.redirect('/urls');
-});
-
-// clears the cookies to logout user
-app.post('/logout', (req, res) => {
-  req.session = null;
-  res.redirect('/login');
-});
-
-// renders registration page
-app.get('/register', (req, res) => {
-  const userID = req.session.user_id;
-  if (userID && users[userID]){
-    return res.redirect('/urls');
-  }
-  const templateVars = { 
-    urls: urlDatabase, 
-    user: users[userID] 
-  };
-  res.render('register', templateVars);
-});
-
-// adds a new user to users object
+// POST /register
+// performs register action
 app.post('/register', (req, res) => {
   // validate email and password have been passed
   const { email, password } = req.body;
@@ -248,6 +227,40 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
+// POST /login
+// performs login action
+app.post('/login', (req, res) => {
+ 
+  // validate email and password have been passed
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).send('Email and password required.');
+  }
+  
+  const emailExists = findEmail(email, users);
+  const userID = getUserByEmail(email, users);
+  
+  if (!emailExists) {
+    return res.status(403).send('Unregistered email.');
+  }
+  const passwordMatches = bcrypt.compareSync(password, users[userID].password);
+
+  if (emailExists && !passwordMatches) {
+    return res.status(403).send('Incorrect password.');
+  }
+  
+  req.session.user_id = users[userID].id;
+  res.redirect('/urls');
+});
+
+// POST /logout
+// performs logging out action
+app.post('/logout', (req, res) => {
+  req.session = null;
+  res.redirect('/login');
+});
+
+// listening for connections
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
 });
