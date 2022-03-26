@@ -1,31 +1,43 @@
+/******************
+ *  SETUP SERVER  *
+ *****************/
+
 const express = require('express');
 const app = express();
 const PORT = 8080;
+app.set('view engine', 'ejs');
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: true}));
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}));
 const bcrypt = require('bcryptjs');
+const res = require('express/lib/response');
 
-const { urlDatabase } = require('./data/urlInfo');
+
+/*****************************
+ *  IMPORT HELPER FUNCTIONS  *
+ ****************************/
+
 const { 
   generateRandomID,
   findEmail,
   getUserByEmail,
   urlsForUser 
 } = require('./helpers/helpers');
-const { users } = require('./data/userInfo');
+
+/**************************
+ *  INITIALIZE DATABASES  *
+ *************************/
+
+const { urlDatabase } = require('./data/urlInfo');
+const users = {};
 
 
-// converts the request body from a Buffer into a readable string
-const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({extended: true}));
 
-const cookieSession = require('cookie-session');
-const res = require('express/lib/response');
-app.use(cookieSession({
-  name: 'session',
-  keys: ['key1', 'key2']
-}));
-
-app.set('view engine', 'ejs');
-
+// GET /
 // redirects to urls_index for current logged in user or login page if not logged in
 app.get('/', (req, res) => {
   const userID = req.session.user_id;
@@ -36,9 +48,10 @@ app.get('/', (req, res) => {
   res.redirect('/urls');
 });
 
+// GET /urls
 app.get('/urls', (req, res) => {
   const userID = req.session.user_id;
-  console.log('user id:', userID);
+
   if (!userID){
     return res.status(403).send('<p>Please <a href="/login">login</a> first.</p>');
   }
@@ -53,6 +66,8 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+
+// GET /urls/new
 app.get('/urls/new', (req, res) => {
   const userID = req.session.user_id;
   const templateVars = { 
@@ -65,6 +80,8 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new', templateVars);
 });
 
+
+// GET /urls/:shortURL
 app.get('/urls/:shortURL', (req, res) => {
   const userID = req.session.user_id;
   const urlToEdit = urlDatabase[req.params.shortURL];
@@ -81,6 +98,16 @@ app.get('/urls/:shortURL', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+// GET /u/:shortURL
+// uses the shortURL to redirect to the longURL
+app.get('/u/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL].longURL;
+  
+  res.redirect(longURL);
+});
+
+// POST /urls
 app.post('/urls', (req, res) => {
   const userID = req.session.user_id;
   
@@ -97,14 +124,7 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// uses the shortURL to redirect to the longURL
-app.get('/u/:shortURL', (req, res) => {
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
-  console.log('longURL:', longURL);
-  res.redirect(longURL);
-});
-
+// POST /urls/:shortURL/delete
 // deletes a url
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userID = req.session.user_id;
@@ -123,6 +143,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   }
 });
 
+// POST /urls/:shortURL
 // edits the longURL
 app.post('/urls/:shortURL', (req, res) => {
   const userID = req.session.user_id;
@@ -163,8 +184,6 @@ app.post('/login', (req, res) => {
   
   const emailExists = findEmail(email, users);
   const userID = getUserByEmail(email, users);
-  console.log('userID: ', userID);
-  console.log('user obj: ', users);
   
   if (!emailExists) {
     return res.status(403).send('Unregistered email.');
@@ -174,7 +193,7 @@ app.post('/login', (req, res) => {
   if (emailExists && !passwordMatches) {
     return res.status(403).send('Incorrect password.');
   }
-  console.log('users.id', users[userID]);
+  
   req.session.user_id = users[userID].id;
   res.redirect('/urls');
 });
