@@ -8,6 +8,11 @@ TinyApp is a full stack web application built with [Node.js](https://nodejs.org)
 
 This project was created and published by me as part of my learnings at Lighthouse Labs.
 
+## TinyApp in Action
+!['Screenshot of register page'](./docs/register.png)
+!['Screenshot of URLS page'](./docs/urls.png)
+!['Screenshot of edit URLs page'](./docs/edit_url.png)
+
 ## Using TinyApp
 
 ### Setup
