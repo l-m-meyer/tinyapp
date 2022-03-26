@@ -35,7 +35,7 @@ const {
  *  INITIALIZE DATABASES  *
  *************************/
 
-const { urlDatabase } = require('./data/urlInfo');
+const urlDatabase = {};
 const users = {};
 
 
