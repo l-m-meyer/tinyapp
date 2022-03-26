@@ -143,6 +143,10 @@ app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   
+  if (!longURL) {
+    res.status(404).send('Page not found.')
+  }
+
   res.redirect(longURL);
 });
 
@@ -257,7 +261,7 @@ app.post('/login', (req, res) => {
 // performs logging out action
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/login');
+  res.redirect('/urls');
 });
 
 // listening for connections
