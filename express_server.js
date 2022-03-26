@@ -6,7 +6,6 @@ const express = require('express');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
-const res = require('express/lib/response'); 
 
 const app = express();
 const PORT = 8080;
@@ -27,7 +26,8 @@ const {
   generateRandomID,
   findEmail,
   getUserByEmail,
-  urlsForUser 
+  urlsForUser,
+  shortURLExists 
 } = require('./helpers/helpers');
 
 
@@ -90,7 +90,7 @@ app.get('/urls', (req, res) => {
   const userID = req.session.user_id;
 
   if (!userID){
-    return res.status(403).send('<p>Please <a href="/login">login</a> first.</p>');
+    return res.status(403).send('<p>403 - Please <a href="/login">login</a> first.</p>');
   }
 
   const userUrls = urlsForUser(userID, urlDatabase);
@@ -126,7 +126,7 @@ app.get('/urls/:shortURL', (req, res) => {
   const urlToEdit = urlDatabase[req.params.shortURL];
 
   if (urlToEdit.userID !== userID) {
-    return res.status(403).send('You do not have permission.');
+    return res.status(403).send('403 - You do not have permission.');
   }
 
   const templateVars = { 
@@ -143,8 +143,8 @@ app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   
-  if (!longURL) {
-    res.status(404).send('Page not found.')
+  if (!(shortURLExists(shortURL, urlDatabase))) {
+    return res.status(404).send('404 - Page not found.')
   }
 
   res.redirect(longURL);
@@ -199,6 +199,9 @@ app.post('/urls/:shortURL', (req, res) => {
   }
   if (!users[userID]) {
     return res.redirect('/login');
+  }
+  if (!(shortURLExists(shortURL, urlDatabase))) {
+    return res.status(404).send('404 - Page not found.')
   }
   urlDatabase[shortURL] = {longURL, userID}
   res.redirect('/urls');

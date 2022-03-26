@@ -11,7 +11,7 @@ const urlsForUser = (id, urlDB) => {
       userUrls[key] = urlDB[key];
     }
   } return userUrls;
-}
+};
 
 // returns a boolean value to find a user by their email
 const findEmail = (email, userDB) => {
@@ -29,9 +29,14 @@ const getUserByEmail = (email, userDB) => {
   }
 };
 
+const shortURLExists = (shortURL, urlDB) => {
+  return urlDB[shortURL] === undefined ? false : true;
+};
+
 module.exports = { 
   generateRandomID,
   findEmail,
   getUserByEmail,
-  urlsForUser 
+  urlsForUser,
+  shortURLExists 
 };
