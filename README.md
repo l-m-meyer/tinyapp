@@ -32,6 +32,7 @@ npm install
 ./views/partials  Partial EJS template used by views
 ./helpers         Helper functions
 ./test            Unit tests
+./docs            Photos of TinyApp
 ```
 
 ### Dependencies
