@@ -1,16 +1,9 @@
-const bcrypt = require('bcryptjs/dist/bcrypt');
-const { users } = require('../data/userInfo');
-
 // returns a string of 6 random alphanumeric characters
 const generateRandomID = () => {
   return Math.random().toString(36).substr(2, 6);
 };
 
-const getCurrentUser = (userDB, req) => {
-  
-};
-
-
+// returns an object with the unique urls for a specified user
 const urlsForUser = (id, urlDB) => {
   const userUrls = {};
   for (let key in urlDB) {
@@ -20,15 +13,14 @@ const urlsForUser = (id, urlDB) => {
   } return userUrls;
 }
 
-
-const addUsers = () => {};
-
+// returns a boolean value to find a user by their email
 const findEmail = (email, userDB) => {
   const emailExists = Object.keys(userDB).find(userID => userDB[userID].email === email);
 
   return emailExists;
 };
 
+// returns the user id of a user searched their email
 const getUserByEmail = (email, userDB) => {
   for (let user in userDB) {
     if (userDB[user].email === email) {
@@ -39,7 +31,6 @@ const getUserByEmail = (email, userDB) => {
 
 module.exports = { 
   generateRandomID,
-  getCurrentUser,
   findEmail,
   getUserByEmail,
   urlsForUser 
