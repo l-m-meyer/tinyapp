@@ -3,18 +3,20 @@
  *****************/
 
 const express = require('express');
+const cookieSession = require('cookie-session');
+const bcrypt = require('bcryptjs');
+const bodyParser = require('body-parser');
+const res = require('express/lib/response'); 
+
 const app = express();
 const PORT = 8080;
-app.set('view engine', 'ejs');
-const bodyParser = require('body-parser');
+
 app.use(bodyParser.urlencoded({extended: true}));
-const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
-const bcrypt = require('bcryptjs');
-const res = require('express/lib/response');
+app.set('view engine', 'ejs');
 
 
 /*****************************
@@ -35,7 +37,9 @@ const {
 const { urlDatabase } = require('./data/urlInfo');
 const users = {};
 
-
+/************
+ *  ROUTES  *
+ ***********/
 
 // GET /
 // redirects to urls_index for current logged in user or login page if not logged in
@@ -49,6 +53,7 @@ app.get('/', (req, res) => {
 });
 
 // GET /urls
+// renders urls_index page for current logged in user or status message if not logged in
 app.get('/urls', (req, res) => {
   const userID = req.session.user_id;
 
